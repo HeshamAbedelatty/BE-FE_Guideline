@@ -23,6 +23,7 @@
 ---
 
 ## **2. How JWT Works**
+<a id="how-jwt-works"></a>
 
 JWT follows a simple flow:
 1. **Login**: The user logs in with credentials (e.g., email/password).
