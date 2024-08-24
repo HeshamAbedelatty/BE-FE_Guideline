@@ -13,6 +13,7 @@ This Blog provides a step-by-step guide to understanding, implementing, and test
     - [Built-in Library Examples](#built-in-library-examples)
 5. [Backend Guide](#backend-guide)
     - [Trying JWT in Postman](#trying-jwt-in-postman)
+    - [JWT_Authentication_Setup](#JWT_authentication_setup)
 
 ---
 
@@ -148,7 +149,7 @@ console.log(decoded);
 <a id="backend-guide"></a>
 
 ### **JWT Authentication Setup**
-
+<a id= "JWT_authentication_setup"></a>
 Ensure you have `djangorestframework-simplejwt` installed and configured:
 
 **Install package:**
