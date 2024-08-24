@@ -91,58 +91,103 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 ### **Manual Token Handling**
 <a id="manual-token-handling-examples"></a>
 
-You can manually handle JWTs by storing them in local storage or cookies and sending them in the Authorization header.
-
-#### **Example: Storing and Using JWT**
+#### Setting Tokens (Manual)
 
 ```javascript
-// Store JWT after login
-localStorage.setItem('access_token', jwtToken);
+function setTokens(username, accessToken, refreshToken) {
+  localStorage.setItem(`${username}_accesstoken`, accessToken);
+  localStorage.setItem(`${username}_refreshtoken`, refreshToken);
+}
+```
 
-// Add JWT to Authorization header in API requests
-fetch('https://api.yoursite.com/protected', {
-  method: 'GET',
-  headers: {
-    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+#### Getting Tokens (Manual)
+
+```javascript
+function getTokens(username) {
+  const accessToken = localStorage.getItem(`${username}_accesstoken`);
+  const refreshToken = localStorage.getItem(`${username}_refreshtoken`);
+  
+  return { accessToken, refreshToken };
+}
+
+// Example Usage
+const username = 'john_doe';
+setTokens(username, 'sample_access_token', 'sample_refresh_token');
+const tokens = getTokens(username);
+console.log('Access Token:', tokens.accessToken);
+console.log('Refresh Token:', tokens.refreshToken);
+```
+
+This manual method sets and retrieves the tokens based on the username.
+
+---
+
+
+#### Setting Tokens (Built-in)
+
+
+**Setting Tokens Automatically After Login**
+
+```javascript
+async function loginUser(username, password) {
+  const response = await fetch('https://api.yoursite.com/api/token/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  
+  const data = await response.json();
+
+  if (response.ok) {
+    localStorage.setItem(`${username}_accesstoken`, data.access);
+    localStorage.setItem(`${username}_refreshtoken`, data.refresh);
+    return true;
   }
-})
-.then(response => response.json())
-.then(data => console.log(data))
-.catch(error => console.error('Error:', error));
-```
-
-### **Handling Expired Tokens**
-
-```javascript
-function isTokenExpired(token) {
-  const payload = JSON.parse(atob(token.split('.')[1]));
-  const currentTime = Math.floor(Date.now() / 1000);
-  return payload.exp < currentTime;
-}
-
-if (isTokenExpired(localStorage.getItem('access_token'))) {
-  console.log('Token expired. Refresh needed.');
+  
+  return false;
 }
 ```
 
-### **Built-in Libraries**
-<a id="built-in-library-examples">
+### Getting Tokens (Built-in)
 
-You can use libraries like `jwt-decode` for easier token handling.
-
-#### **Example: Using `jwt-decode` Library**
-
-```bash
-npm install jwt-decode
-```
+Here’s an example of how you can automatically attach tokens to requests and refresh them if necessary:
 
 ```javascript
-import jwt_decode from 'jwt-decode';
+async function fetchWithAuth(username, url, options = {}) {
+  let accessToken = localStorage.getItem(`${username}_accesstoken`);
+  let refreshToken = localStorage.getItem(`${username}_refreshtoken`);
 
-const decoded = jwt_decode(localStorage.getItem('access_token'));
-console.log(decoded);
+  // Check if the token is expired
+  if (isTokenExpired(accessToken)) {
+    const refreshResponse = await fetch('https://api.yoursite.com/api/token/refresh/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+    
+    const refreshData = await refreshResponse.json();
+
+    if (refreshResponse.ok) {
+      localStorage.setItem(`${username}_accesstoken`, refreshData.access);
+      accessToken = refreshData.access;
+    } else {
+      // Handle refresh failure (e.g., log the user out)
+      console.log('Refresh token expired');
+      return;
+    }
+  }
+
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+}
 ```
 
+**note that its just one example, there is a lot of ways. that code is not static.**
 ---
 
 ## **5. Backend Guide**
