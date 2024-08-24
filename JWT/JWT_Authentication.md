@@ -1,7 +1,7 @@
 # JWT Authentication Guide
 
 ## **Table of Contents**
-1. [Introduction to JWT](#introduction-to-jwt)
+1. [Introduction to JWT](##introduction-to-jwt)
 2. [How JWT Works](#how-jwt-works)
 3. [JWT Structure](#jwt-structure)
     - Access Tokens
