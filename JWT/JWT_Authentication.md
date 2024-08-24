@@ -17,7 +17,7 @@
 ---
 
 ## **1. Introduction to JWT**
-
+<a id="introduction-to-jwt"></a>
 **JWT (JSON Web Token)** is a compact, URL-safe token used for securely transmitting information between parties as a JSON object. It is commonly used for authentication, where a client receives a token after a successful login and then includes this token in subsequent requests to protected endpoints.
 
 ---
