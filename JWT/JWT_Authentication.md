@@ -28,7 +28,7 @@ This Blog provides a step-by-step guide to understanding, implementing, and test
 JWT follows a simple flow:
 1. **Login**: The user logs in with credentials (e.g., email/password).
 2. **Token Issuance**: The server validates the credentials and issues a JWT, which is sent back to the client.
-3. **Using the Token**: The client includes the JWT in the Authorization header for future API requests, allowing the server to identify the user without requiring them to re-authenticate.
+3. **Using the Token**: The client includes the JWT in the Authorization header for future API requests, **allowing** the server to identify the user without requiring them to **re-authenticate**.
 4. **Token Expiry**: JWTs have a limited lifespan. When the token expires, the client either refreshes it using a refresh token or the user logs in again.
 
 ---
@@ -37,10 +37,36 @@ JWT follows a simple flow:
 <a id="jwt-structure"></a>
 
 JWT consists of three parts, separated by dots (`.`):
-1. **Header**: Contains metadata about the type of token and the algorithm used for signing.
-2. **Payload**: Contains the claims or information being transmitted, such as user data and the expiration time (`exp`).
-3. **Signature**: Verifies the authenticity of the token, ensuring it has not been tampered with.
+1. **Header**:
+   - **Purpose**: Specifies the token type and the signing algorithm used.
+   - **Example**: `{ "alg": "HS256", "typ": "JWT" }`
+   - **Encoded**: Base64Url encoding.
 
+2. **Payload**:
+   - **Purpose**: Contains the claims, which are statements about an entity (usually the user) and additional metadata.
+   - **Example**: `{ "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }`
+   - **Encoded**: Base64Url encoding.
+   - **JWT Date Representation**:
+        - `iat` (issued at) represents the time when the token was issued.
+        - `1516239022` is a Unix timestamp.
+        - The Unix timestamp `1516239022` is converted to a human-readable date `2018-01-18 21:43:42` 
+
+3. **Signature**:
+   - **Purpose**: Ensures the integrity and authenticity of the token by verifying that the header and payload were not altered.
+   - **How it's created**: By combining the encoded header and payload with a secret key and then hashing it.
+   - **Example**: `SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+### Example JWT
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ
+.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+```
+- **Header**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+- **Payload**: `eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ`
+- **Signature**: `SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+  
 ### **Access Tokens**
 <a id="access-tokens"></a>
 - **Short-lived** (e.g., 5-15 minutes).
@@ -121,48 +147,138 @@ console.log(decoded);
 ## **5. Backend Guide**
 <a id="backend-guide"></a>
 
+### **JWT Authentication Setup**
+
+Ensure you have `djangorestframework-simplejwt` installed and configured:
+
+**Install package:**
+
+```bash
+pip install djangorestframework-simplejwt
+```
+
+**Configure in `settings.py`:**
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Add JWT settings
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=24),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+```
+
+#### **2. Refresh Token Endpoint**
+
+**urls.py:**
+
+```python
+from django.urls import path
+from rest_framework_simplejwt import views as jwt_views
+
+urlpatterns = [
+    # Other paths...
+    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+]
+```
+
+**Views Handling JWT:**
+
+***You typically don’t need to manually handle JWT in views as `simplejwt` provides the required endpoints. However, you may customize them if needed.***
+
+#### **3. Protecting Endpoints**
+
+Use the JWT authentication class to protect your API views.
+
+**views.py:**
+
+```python
+from rest_framework import permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class ProtectedView(APIView):
+    permission_classes = [permissions.IsAuthenticated] # Check the Key if it in request or not.
+
+    def get(self, request):
+        user = request.user
+        return Response({'message': 'You have access to this view!', 'user': user.username})
+```
+
+
 ### **Trying JWT in Postman**
 <a id="trying-jwt-in-postman"></a>
 
 #### **Login and Retrieve Token**
-1. Open Postman and create a POST request to your login endpoint (e.g., `/api/token/`).
-2. Include the user's credentials in the request body:
-   ```json
-   {
-     "username": "user@example.com",
-     "password": "password123"
-   }
-   ```
-3. Send the request and retrieve the access and refresh tokens from the response.
+1. **POST Request to Login Endpoint**
 
-![Postman Login](https://i.imgur.com/POSTMAN_LOGIN_EXAMPLE.png)
+   - **URL**: `/api/token/` or `/login`
+   - **Method**: POST
+   - **Body**:
+     ```json
+     {
+       "username": "user@example.com",
+       "password": "password123"
+     }
+     ```
+   - **Response**: 
+     ```json
+     {
+       "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+       "refresh": "dGhpcy1pcy1hLXJlZnJlc2g2MDY1ZGZkY2FzbmJhdHM5ZDMzZTEz"
+     }
+     ```
+
+   ![Postman Login](POSTMAN_LOGIN_EXAMPLE.jpg)
+
+---
 
 #### **Using the Access Token**
+1. **GET Request to books root**
 
-1. Create a new GET request in Postman to a protected route (e.g., `/api/protected/`).
-2. Add the Authorization header with the access token:
-   ```
-   Authorization: Bearer <your_access_token>
-   ```
+   - **URL**: `/List/`
+   - **Method**: GET
+   - **Headers**:
+     ```
+     Authorization: Bearer <your_access_token>
+     ```
+   - **Response**:
+     ```json
+     {
+       "data": "This is my lists data"
+     }
+     ```
 
-![Postman Authorization](https://i.imgur.com/POSTMAN_AUTHORIZATION_EXAMPLE.png)
+   ![Postman Authorization](POSTMAN_AUTHORIZATION_get.jpg)
+   ![Postman Authorization](POSTMAN_AUTHORIZATION_get2.jpg)
 
-3. Send the request to access the protected resource.
-
-![Postman Success](https://i.imgur.com/POSTMAN_SUCCESS_EXAMPLE.png)
+---
 
 #### **Refreshing the Token**
+1. **POST Request to Refresh Endpoint**
 
-1. Create a new POST request to the refresh endpoint (e.g., `/api/token/refresh/`).
-2. Add the refresh token to the request body:
-   ```json
-   {
-     "refresh": "<your_refresh_token>"
-   }
-   ```
-
-3. Send the request to get a new access token.
-
-![Postman Refresh](https://i.imgur.com/POSTMAN_REFRESH_EXAMPLE.png)
-
+   - **URL**: `/api/token/refresh/`
+   - **Method**: POST
+   - **Body**:
+     ```json
+     {
+       "refresh": "dGhpcy1pcy1hLXJlZnJlc2g2MDY1ZGZkY2FzbmJhdHM5ZDMzZTEz"
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+     }
+     ```
 ---
