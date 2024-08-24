@@ -1,18 +1,18 @@
 # JWT Authentication Guide
+This Blog provides a step-by-step guide to understanding, implementing, and testing JWT in both frontend and backend scenarios.
 
 ## **Table of Contents**
 1. [Introduction to JWT](##introduction-to-jwt)
 2. [How JWT Works](#how-jwt-works)
 3. [JWT Structure](#jwt-structure)
-    - Access Tokens
-    - Refresh Tokens
+    - [Access Tokens](#access-tokens)
+    - [Refresh Tokens](#refresh-tokens)
 4. [Frontend Guide](#frontend-guide)
-    - How to Handle JWT in Frontend
-    - Manual Token Handling Examples
-    - Built-in Library Examples
+    - [How to Handle JWT in Frontend](#how-to-handle-jwt-in-frontend)
+    - [Manual Token Handling Examples](#manual-token-handling-examples)
+    - [Built-in Library Examples](#built-in-library-examples)
 5. [Backend Guide](#backend-guide)
-    - Trying JWT in Postman
-    - Example with Photos
+    - [Trying JWT in Postman](#trying-jwt-in-postman)
 
 ---
 
@@ -34,6 +34,7 @@ JWT follows a simple flow:
 ---
 
 ## **3. JWT Structure**
+<a id="jwt-structure"></a>
 
 JWT consists of three parts, separated by dots (`.`):
 1. **Header**: Contains metadata about the type of token and the algorithm used for signing.
@@ -41,11 +42,13 @@ JWT consists of three parts, separated by dots (`.`):
 3. **Signature**: Verifies the authenticity of the token, ensuring it has not been tampered with.
 
 ### **Access Tokens**
+<a id="access-tokens"></a>
 - **Short-lived** (e.g., 5-15 minutes).
 - Used to access protected resources.
 - Stored client-side, typically in local storage or cookies.
 
 ### **Refresh Tokens**
+<a id="refresh-tokens"></a>
 - **Long-lived** (e.g., days to weeks).
 - Used to obtain a new access token when the current one expires.
 - Usually stored securely (e.g., in `httpOnly` cookies).
@@ -53,10 +56,13 @@ JWT consists of three parts, separated by dots (`.`):
 ---
 
 ## **4. Frontend Guide**
+<a id="frontend-guide"></a>
 
 ### **How to Handle JWT in Frontend**
+<a id="how-to-handle-jwt-in-frontend"></a>
 
 ### **Manual Token Handling**
+<a id="manual-token-handling-examples"></a>
 
 You can manually handle JWTs by storing them in local storage or cookies and sending them in the Authorization header.
 
@@ -93,6 +99,7 @@ if (isTokenExpired(localStorage.getItem('access_token'))) {
 ```
 
 ### **Built-in Libraries**
+<a id="built-in-library-examples">
 
 You can use libraries like `jwt-decode` for easier token handling.
 
@@ -112,8 +119,10 @@ console.log(decoded);
 ---
 
 ## **5. Backend Guide**
+<a id="backend-guide"></a>
 
 ### **Trying JWT in Postman**
+<a id="trying-jwt-in-postman"></a>
 
 #### **Login and Retrieve Token**
 1. Open Postman and create a POST request to your login endpoint (e.g., `/api/token/`).
@@ -157,6 +166,3 @@ console.log(decoded);
 ![Postman Refresh](https://i.imgur.com/POSTMAN_REFRESH_EXAMPLE.png)
 
 ---
-
-This README provides a step-by-step guide to understanding, implementing, and testing JWT in both frontend and backend scenarios. Feel free to expand with more details or specific code examples as needed for your team!
-
