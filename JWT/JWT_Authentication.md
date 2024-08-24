@@ -12,9 +12,9 @@ This Blog provides a step-by-step guide to understanding, implementing, and test
     - [Manual Token Handling Examples](#manual-token-handling-examples)
     - [Built-in Library Examples](#built-in-library-examples)
 5. [Backend Guide](#backend-guide)
-    - [Trying JWT in Postman](#trying-jwt-in-postman)
     - [JWT_Authentication_Setup](#JWT_authentication_setup)
-
+    - [Trying JWT in Postman](#trying-jwt-in-postman)
+    
 ---
 
 ## **1. Introduction to JWT**
