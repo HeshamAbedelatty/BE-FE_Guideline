@@ -1,7 +1,6 @@
 # BE-FE_Guideline 
 
 
-Here's a sample `README.md` file that provides examples of endpoints for your Django REST Framework project. This README includes sections that outline how to interact with your API, including the `RegisterView` endpoint as well as other common actions like creating, retrieving, updating, and deleting resources.
 
 # API Documentation
 
